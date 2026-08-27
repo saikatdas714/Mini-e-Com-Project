@@ -6,6 +6,7 @@ const connection = require('./model/connection')
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const authenticate = require('./middleware/auth');
+const adminAuth = require('./middleware/adminAuth');
 
 const {
     createUser,
@@ -36,15 +37,15 @@ const port = 3000;
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(process.cwd(), 'public')));
-app.set('view engine','ejs')
+app.set('view engine', 'ejs')
 app.use(cookieParser());
 
 
 app.get('/', async (req, res) => {
     const products = await getProducts()
-    res.render('home',{products})
+    res.render('home', { products })
 });
-app.get('/login',(req,res)=>{
+app.get('/login', (req, res) => {
     res.render('login');
 })
 app.post('/login', async (req, res) => {
@@ -101,7 +102,7 @@ app.post('/signup', async (req, res) => {
                 email: user.email,
                 role: user.role
             },
-             process.env.JWT_SECRET,
+            process.env.JWT_SECRET,
             {
                 expiresIn: '1h'
             }
@@ -134,10 +135,10 @@ app.post('/signup', async (req, res) => {
         res.status(500).send('Server error');
     }
 });
-app.get('/add-product',(req,res)=>{
+app.get('/add-product', authenticate, adminAuth, (req, res) => {
     res.render('add-product')
 })
-app.post('/add-product',async(req,res)=>{
+app.post('/add-product', authenticate, adminAuth, async (req, res) => {
     const { name, price, description, image } = req.body;
 
     try {
@@ -204,6 +205,46 @@ app.post('/cart/remove/:id', authenticate, async (req, res) => {
         res.status(500).send('Failed to remove product');
     }
 });
+app.get('/create-admin', (req, res) => {
+    res.render('create-admin');
+});
+
+app.post('/create-admin', async (req, res) => {
+
+    const { name, email, password } = req.body;
+
+    try {
+
+        await createUser(
+            name,
+            email,
+            password,
+            'admin'
+        );
+
+        res.send(`
+            <script>
+                alert("Admin created successfully!");
+                window.location.href = "/";
+            </script>
+        `);
+
+    } catch (error) {
+
+        console.error(error);
+
+        if (error.message === 'User already exists') {
+            return res.send(`
+                <script>
+                    alert("Email already registered!");
+                    window.location.href = "/create-admin";
+                </script>
+            `);
+        }
+
+        res.status(500).send('Failed to create admin');
+    }
+});
 app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}/`);
+    console.log(`Server running at http://localhost:${port}/`);
 });
