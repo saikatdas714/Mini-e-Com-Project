@@ -67,9 +67,11 @@
                                 ₹<%= element.price %>
                             </h6>
 
-                            <button class="btn btn-primary w-100">
-                                Add to cart
-                            </button>
+                            <form action="/cart/<%= element.id %>" method="POST">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    Add to Cart
+                                </button>
+                            </form>
 
                         </div>
                     </div>

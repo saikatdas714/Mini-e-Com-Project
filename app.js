@@ -25,6 +25,11 @@ const {
     updateProduct,
     deleteProduct
 } = require('./controllers/productController');
+const {
+    addToCart,
+    getCart,
+    removeFromCart
+} = require('./controllers/cartController');
 
 const app = express();
 const port = 3000;
@@ -148,6 +153,55 @@ app.post('/add-product',async(req,res)=>{
     } catch (error) {
         console.error(error);
         res.status(500).send('Failed to add product');
+    }
+});
+app.get('/cart', authenticate, async (req, res) => {
+
+    try {
+
+        const cart = await getCart(req.user.id);
+
+        res.render('cart', { cart });
+
+    } catch (error) {
+
+        console.error(error);
+        res.status(500).send('Failed to load cart');
+
+    }
+
+});
+app.post('/cart/:id', authenticate, async (req, res) => {
+
+    try {
+
+        const userId = req.user.id;
+        const productId = req.params.id;
+
+        await addToCart(userId, productId);
+
+        res.redirect('/');
+
+    } catch (error) {
+
+        console.error(error);
+        res.status(500).send('Failed to add product to cart');
+
+    }
+
+});
+app.post('/cart/remove/:id', authenticate, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const productId = req.params.id;
+
+        await removeFromCart(userId, productId);
+
+        res.redirect('/cart');
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Failed to remove product');
     }
 });
 app.listen(port, () => {
