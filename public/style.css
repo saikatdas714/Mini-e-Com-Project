@@ -15,3 +15,8 @@ font-family: 'Instagram Sans', sans-serif;
     width: 80vw;
     padding: 5%;
 }
+.image{
+    height: 6vh;
+    width: 6vw;
+    margin-right: 2vw;
+}
