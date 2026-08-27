@@ -26,14 +26,7 @@
                     <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="#">Home</a>
                     </li>
-
                 </ul>
-                <!-- search -->
-                <form method="post" action="/" class="d-flex" role="search">
-                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"
-                        name="search" />
-                    <button class="btn btn-outline-success" type="submit">Search</button>
-                </form>
             </div>
         </div>
     </nav>
@@ -41,19 +34,49 @@
     <div class="item container mt-3">
         <div class="row row-cols-1 row-cols-md-3 g-4">
 
-            <div class="col">
-            <div class="card h-100">
-            <img src="https://image.metroshoes.com/cdn-cgi/image/width=400,quality=85,format=auto/products/71-458/550/71-458LA62.jpg" class="card-img-top" alt="...">
-            <div class="card-body">
-            <h5 class="card-title">Card title</h5>
-            <p class="card-text">This is a longer card with supporting text below as a natural lead-in to
-            additional content. This content is a little bit longer.</p>
-                <button class="btn btn-primary w-100" >Add to cart</button>
-            </div>
-            </div>
-            </div>
+            <!-- <div class="col size ">
+                <div class="card ">
+                    <img src="https://image.metroshoes.com/cdn-cgi/image/width=400,quality=85,format=auto/products/71-458/550/71-458LA62.jpg"
+                        class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title">Card title</h5>
+                        <p class="card-text">This is a longer card with supporting text below as a natural lead-in to
+                            additional content. This content is a little bit longer.</p>
+                        <button class="btn btn-primary w-100">Add to cart</button>
+                    </div>
+                </div>
+            </div> -->
+            <% products.forEach(element=> { %>
 
-           
+                <div class="col size">
+                    <div class="card h-100">
+
+                        <img src="<%= element.image %>" class="card-img-top" alt="<%= element.name %>">
+
+                        <div class="card-body">
+
+                            <h5 class="card-title">
+                                <%= element.name %>
+                            </h5>
+
+                            <p class="card-text">
+                                <%= element.description %>
+                            </p>
+
+                            <h6 class="mb-3">
+                                ₹<%= element.price %>
+                            </h6>
+
+                            <button class="btn btn-primary w-100">
+                                Add to cart
+                            </button>
+
+                        </div>
+                    </div>
+                </div>
+
+                <% }) %>
+
         </div>
     </div>
 </body>

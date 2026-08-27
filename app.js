@@ -18,6 +18,13 @@ const {
     updateRole,
     deleteUser
 } = require('./controllers/userController');
+const {
+    createProduct,
+    getProducts,
+    getProductById,
+    updateProduct,
+    deleteProduct
+} = require('./controllers/productController');
 
 const app = express();
 const port = 3000;
@@ -29,8 +36,8 @@ app.use(cookieParser());
 
 
 app.get('/', async (req, res) => {
-    console.table(await getUsers());
-    res.render('home')
+    const products = await getProducts()
+    res.render('home',{products})
 });
 app.get('/login',(req,res)=>{
     res.render('login');
@@ -77,7 +84,6 @@ app.post('/login', async (req, res) => {
 app.get('/signup', (req, res) => {
     res.render('signup');
 });
-
 app.post('/signup', async (req, res) => {
     const { name, email, password } = req.body;
 
@@ -123,7 +129,27 @@ app.post('/signup', async (req, res) => {
         res.status(500).send('Server error');
     }
 });
+app.get('/add-product',(req,res)=>{
+    res.render('add-product')
+})
+app.post('/add-product',async(req,res)=>{
+    const { name, price, description, image } = req.body;
 
+    try {
+        await createProduct(
+            name,
+            price,
+            description,
+            image
+        );
+
+        res.redirect('/');
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Failed to add product');
+    }
+});
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}/`);
 });
