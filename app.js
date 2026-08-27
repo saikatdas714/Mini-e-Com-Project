@@ -205,11 +205,11 @@ app.post('/cart/remove/:id', authenticate, async (req, res) => {
         res.status(500).send('Failed to remove product');
     }
 });
-app.get('/create-admin', (req, res) => {
+app.get('/create-admin',authenticate,adminAuth, (req, res) => {
     res.render('create-admin');
 });
 
-app.post('/create-admin', async (req, res) => {
+app.post('/create-admin',authenticate,adminAuth,async (req, res) => {
 
     const { name, email, password } = req.body;
 
