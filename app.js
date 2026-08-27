@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { log } = require('console');
 const express = require('express')
 const path = require('path')
@@ -5,7 +6,7 @@ const connection = require('./model/connection')
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const authenticate = require('./middleware/auth');
-require('dotenv').config();
+
 const {
     createUser,
     getUsers,

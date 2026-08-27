@@ -1,12 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
-</head>
-<body>
-    <h1>Home</h1>
 
+    <title>Mini-e-Com</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+    <!-- nevbar -->
+    <nav class="navbar  navbar-expand-lg " style="background-color: #e3f2fd;" data-bs-theme="light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">Mini e Com</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <!-- list -->
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#">Home</a>
+                    </li>
+
+                </ul>
+                <!-- search -->
+                <form method="post" action="/" class="d-flex" role="search">
+                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"
+                        name="search" />
+                    <button class="btn btn-outline-success" type="submit">Search</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+    <!-- item -->
+    <div class="item container mt-3">
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+
+            <div class="col">
+            <div class="card h-100">
+            <img src="https://image.metroshoes.com/cdn-cgi/image/width=400,quality=85,format=auto/products/71-458/550/71-458LA62.jpg" class="card-img-top" alt="...">
+            <div class="card-body">
+            <h5 class="card-title">Card title</h5>
+            <p class="card-text">This is a longer card with supporting text below as a natural lead-in to
+            additional content. This content is a little bit longer.</p>
+                <button class="btn btn-primary w-100" >Add to cart</button>
+            </div>
+            </div>
+            </div>
+
+           
+        </div>
+    </div>
 </body>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
 </html>
