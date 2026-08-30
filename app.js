@@ -202,7 +202,7 @@ app.post('/cart/:id', authenticate, async (req, res) => {
 
         await addToCart(userId, productId);
 
-        res.redirect('/');
+        res.redirect('/cart');
 
     } catch (error) {
 
