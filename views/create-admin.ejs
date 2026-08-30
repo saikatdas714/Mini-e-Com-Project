@@ -4,65 +4,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Admin - Mini e-Com</title>
 
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-    >
-
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Custom Style -->
     <link rel="stylesheet" href="/style.css">
-
-    <title>Create Admin</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 </head>
 
 <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <div class="brand-icon-wrapper">
+                    <i class="bi bi-bag-heart-fill"></i>
+                </div>
+                <span>Mini e-Com</span>
+            </a>
+            
+            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <i class="bi bi-list fs-2 text-dark"></i>
+            </button>
 
-    <h1 class="text-center mt-5">Create Admin</h1>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3 gap-1">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="bi bi-house-door"></i> Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/cart"><i class="bi bi-cart3"></i> Cart</a>
+                    </li>
+                    <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/add-product"><i class="bi bi-plus-circle"></i> Add Product</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/create-admin"><i class="bi bi-shield-lock"></i> Create Admin</a>
+                    </li>
+                    <% } %>
+                </ul>
 
-    <div class="form container mt-5 box">
+                <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
+                    <% if (typeof user !== 'undefined' && user) { %>
+                        <div class="user-profile-badge">
+                            <i class="bi bi-person-circle text-primary fs-6"></i>
+                            <span><%= user.email.split('@')[0] %></span>
+                            <span class="role-tag <%= user.role === 'admin' ? 'role-admin' : 'role-user' %>">
+                                <%= user.role %>
+                            </span>
+                        </div>
+                        <a href="/logout" class="btn btn-modern-secondary py-2 px-3" title="Logout">
+                            <i class="bi bi-box-arrow-right text-danger"></i> Logout
+                        </a>
+                    <% } else { %>
+                        <a href="/login" class="btn btn-modern-secondary py-2 px-3">
+                            <i class="bi bi-box-arrow-in-right"></i> Login
+                        </a>
+                        <a href="/signup" class="btn btn-modern-primary py-2 px-3">
+                            <i class="bi bi-person-plus"></i> Sign Up
+                        </a>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </nav>
 
-        <form method="post" action="/create-admin" class="row g-5">
-
-            <div class="col-md-12">
-                <input
-                    type="text"
-                    class="form-control"
-                    name="name"
-                    placeholder="Name"
-                    required
-                >
+    <!-- Main Content -->
+    <div class="auth-wrapper">
+        <div class="form-card">
+            <div class="form-header">
+                <div class="form-icon-circle" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;">
+                    <i class="bi bi-shield-lock-fill"></i>
+                </div>
+                <h1 class="form-title">Create Admin User</h1>
+                <p class="form-subtitle">Provision an administrative account with management privileges</p>
             </div>
 
-            <div class="col-md-12">
-                <input
-                    type="email"
-                    class="form-control"
-                    name="email"
-                    placeholder="Email"
-                    required
-                >
+            <div class="p-3 mb-4 rounded-3 bg-light border d-flex align-items-center gap-2 text-muted small">
+                <i class="bi bi-info-circle-fill text-primary fs-5"></i>
+                <span>Admin users gain complete access to add and manage inventory products.</span>
             </div>
 
-            <div class="col-md-12">
-                <input
-                    type="password"
-                    class="form-control"
-                    name="password"
-                    placeholder="Password"
-                    required
-                >
-            </div>
+            <form method="POST" action="/create-admin">
+                <!-- Name -->
+                <div class="mb-3">
+                    <label for="name" class="form-label">Full Name</label>
+                    <div class="input-icon-group">
+                        <input type="text" class="form-control" id="name" name="name" placeholder="Admin Name" required>
+                        <i class="bi bi-person input-icon"></i>
+                    </div>
+                </div>
 
-            <div class="col-12">
-                <button type="submit" class="btn btn-primary w-100">
-                    Create Admin
+                <!-- Email -->
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email Address</label>
+                    <div class="input-icon-group">
+                        <input type="email" class="form-control" id="email" name="email" placeholder="admin@example.com" required>
+                        <i class="bi bi-envelope input-icon"></i>
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="mb-4">
+                    <label for="password" class="form-label">Password</label>
+                    <div class="input-icon-group">
+                        <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required>
+                        <i class="bi bi-key input-icon"></i>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-modern-primary w-100 py-3 fs-6" style="background: linear-gradient(135deg, #8b5cf6, #6366f1);">
+                    <i class="bi bi-shield-plus"></i> Create Admin Account
                 </button>
-            </div>
-
-        </form>
-
+            </form>
+        </div>
     </div>
 
+    <!-- Footer -->
+    <footer class="footer-custom">
+        <div class="container text-center">
+            <p class="mb-0 text-muted small">&copy; 2026 Mini e-Com. Security & Administration.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

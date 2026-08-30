@@ -40,6 +40,27 @@ app.use(express.static(path.join(process.cwd(), 'public')));
 app.set('view engine', 'ejs')
 app.use(cookieParser());
 
+// Global user session middleware for all views
+app.use((req, res, next) => {
+    const token = req.cookies.token;
+    if (token) {
+        try {
+            const user = jwt.verify(token, process.env.JWT_SECRET);
+            res.locals.user = user;
+            req.user = user;
+        } catch (e) {
+            res.locals.user = null;
+        }
+    } else {
+        res.locals.user = null;
+    }
+    next();
+});
+
+app.get('/logout', (req, res) => {
+    res.clearCookie('token');
+    res.redirect('/login');
+});
 
 app.get('/', async (req, res) => {
     const products = await getProducts()
