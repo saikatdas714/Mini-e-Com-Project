@@ -33,10 +33,23 @@ CREATE TABLE IF NOT EXISTS public.cart (
     CONSTRAINT unique_user_product UNIQUE (user_id, product_id)
 );
 
+-- 4. Orders Table
+CREATE TABLE IF NOT EXISTS public.orders (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    order_id VARCHAR(100) UNIQUE NOT NULL,
+    user_id BIGINT NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+    total_amount NUMERIC(10, 2) NOT NULL,
+    status VARCHAR(50) DEFAULT 'pending' NOT NULL,
+    payment_screenshot TEXT,
+    items JSONB,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Disable Row Level Security (RLS) so the server service key has unrestricted access
 ALTER TABLE public.users DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.products DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.cart DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.orders DISABLE ROW LEVEL SECURITY;
 
 -- Optional: Initial Seed Products
 INSERT INTO public.products (name, price, description, image)
