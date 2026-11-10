@@ -14,7 +14,7 @@ function authenticate(req, res, next) {
     try {
         const user = jwt.verify(
             token,
-            process.env.JWT_SECRET
+            process.env.JWT_SECRET || 'ecommerce_super_secret_jwt_key_2026'
         );
 
         req.user = user;

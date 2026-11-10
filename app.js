@@ -41,9 +41,11 @@ const app = express();
 const port = 3000;
 
 app.use(express.urlencoded({ extended: false }));
-app.use(express.static(path.join(process.cwd(), 'public')));
-app.get('/favicon.ico', (req, res) => res.sendFile(path.join(process.cwd(), 'public', 'bag-check-fill.svg')));
-app.set('view engine', 'ejs')
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
+app.get('/favicon.ico', (req, res) => res.sendFile(path.join(__dirname, 'public', 'bag-check-fill.svg')));
 app.use(cookieParser());
 
 // Global user session middleware for all views
@@ -52,7 +54,7 @@ app.use(async (req, res, next) => {
     res.locals.cartCount = 0;
     if (token) {
         try {
-            const user = jwt.verify(token, process.env.JWT_SECRET);
+            const user = jwt.verify(token, process.env.JWT_SECRET || 'ecommerce_super_secret_jwt_key_2026');
             res.locals.user = user;
             req.user = user;
             res.locals.cartCount = await getCartCount(user.id);
@@ -202,25 +204,9 @@ app.get('/cart', authenticate, async (req, res) => {
 
 });
 
-// Configure multer storage for payment screenshot uploads
-const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, uploadDir);
-    },
-    filename: (req, file, cb) => {
-        const ext = path.extname(file.originalname) || '.jpg';
-        const uniqueName = `payment-${Date.now()}-${Math.round(Math.random() * 1E9)}${ext}`;
-        cb(null, uniqueName);
-    }
-});
-
+// Configure multer with memory storage so it works reliably in both local and read-only serverless environments (e.g. Vercel)
 const upload = multer({
-    storage,
+    storage: multer.memoryStorage(),
     limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
     fileFilter: (req, file, cb) => {
         if (file.mimetype.startsWith('image/')) {
@@ -253,7 +239,7 @@ app.post('/cart/checkout', authenticate, upload.single('paymentProof'), async (r
             return res.redirect('/cart');
         }
 
-        console.log(`[Checkout] Received payment screenshot: "${req.file.originalname}" (${(req.file.size / 1024).toFixed(1)} KB) -> saved to: ${req.file.path}`);
+        console.log(`[Checkout] Received payment screenshot: "${req.file.originalname}" (${(req.file.size / 1024).toFixed(1)} KB)`);
 
         const user = (await getUserById(userId)) || req.user;
         const totalAmount = cart.reduce((sum, item) => sum + (Number(item.price) || 0), 0);
@@ -269,9 +255,9 @@ app.post('/cart/checkout', authenticate, upload.single('paymentProof'), async (r
                 items: cart,
                 totalAmount,
                 paymentScreenshot: {
-                    path: req.file.path,
+                    buffer: req.file.buffer,
                     originalname: req.file.originalname,
-                    filename: req.file.filename
+                    mimetype: req.file.mimetype
                 }
             });
         } catch (emailErr) {
@@ -384,6 +370,10 @@ app.post('/create-admin',authenticate,adminAuth,async (req, res) => {
         res.status(500).send('Failed to create admin');
     }
 });
-app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}/`);
-});
+if (!process.env.VERCEL) {
+    app.listen(port, () => {
+        console.log(`Server running at http://localhost:${port}/`);
+    });
+}
+
+module.exports = app;
