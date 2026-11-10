@@ -179,11 +179,9 @@
                                 <span>₹<%= totalAmount.toLocaleString('en-IN') %></span>
                             </div>
 
-                            <form action="/cart/checkout" method="POST" class="m-0" onsubmit="const btn = this.querySelector('button'); btn.disabled = true; btn.innerHTML = '<span class=\'spinner-border spinner-border-sm me-2\'></span>Processing Order...';">
-                                <button type="submit" class="btn-buy-retail">
-                                    <i class="bi bi-lightning-fill"></i> PLACE ORDER
-                                </button>
-                            </form>
+                            <button type="button" class="btn-buy-retail" onclick="openCheckoutModal()">
+                                <i class="bi bi-lightning-fill"></i> PLACE ORDER
+                            </button>
 
                             <div class="text-center mt-3 text-secondary small">
                                 <i class="bi bi-lock-fill text-success"></i> 256-Bit Bank Grade Security
@@ -192,8 +190,202 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Custom Animated E-Commerce Modal -->
+            <div id="checkoutCustomModal" class="custom-modal-backdrop" onclick="handleBackdropClick(event)">
+                <div class="custom-modal-card">
+                    <!-- Modal Header -->
+                    <div class="custom-modal-header">
+                        <h5 class="custom-modal-title" id="modalHeaderTitle">
+                            <i class="bi bi-bag-check-fill text-warning"></i> Confirm Your Order
+                        </h5>
+                        <button type="button" class="custom-modal-close-btn" onclick="closeCheckoutModal()" aria-label="Close">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+
+                    <!-- Modal Body: Confirmation Stage -->
+                    <div id="modalConfirmStage" class="custom-modal-body">
+                        <p class="text-secondary small mb-3">
+                            Please review your order summary below. Once confirmed, your order will be placed and processed immediately.
+                        </p>
+
+                        <div class="modal-summary-box">
+                            <div class="modal-summary-row">
+                                <span>Items in Cart</span>
+                                <span class="fw-semibold text-dark"><%= cart.length %> items</span>
+                            </div>
+                            <div class="modal-summary-row">
+                                <span>Subtotal</span>
+                                <span class="text-dark">₹<%= subtotal.toLocaleString('en-IN') %></span>
+                            </div>
+                            <div class="modal-summary-row">
+                                <span>Delivery Fee</span>
+                                <span class="text-success fw-bold">FREE</span>
+                            </div>
+                            <div class="modal-summary-row total">
+                                <span>Total Payable</span>
+                                <span class="text-accent">₹<%= totalAmount.toLocaleString('en-IN') %></span>
+                            </div>
+                        </div>
+
+                        <div class="modal-info-badge mb-2">
+                            <i class="bi bi-envelope-check-fill text-primary fs-5 mt-1"></i>
+                            <div>
+                                <span class="fw-semibold d-block">Instant Email Confirmation</span>
+                                A well-drafted invoice and order details will be sent to <strong>saikatdas7320@gmail.com</strong>.
+                            </div>
+                        </div>
+
+                        <div class="custom-modal-footer px-0 pb-0 mt-3 border-0 bg-transparent">
+                            <button type="button" class="btn btn-secondary-retail py-2 px-3" onclick="closeCheckoutModal()">
+                                Cancel
+                            </button>
+                            <button type="button" class="btn-buy-retail py-2 px-4 w-auto m-0" id="btnConfirmCheckout" onclick="processCheckout()">
+                                <i class="bi bi-check-circle-fill"></i> Confirm & Place Order
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Modal Body: Success Stage -->
+                    <div id="modalSuccessStage" class="custom-modal-body text-center" style="display: none;">
+                        <div class="success-icon-wrapper">
+                            <i class="bi bi-check-lg"></i>
+                        </div>
+
+                        <h3 class="fs-4 fw-bold text-dark mb-1">Order Placed Successfully!</h3>
+                        <div class="mb-3">
+                            <span class="order-id-pill" id="displayOrderId">#ORD-SUCCESS</span>
+                        </div>
+
+                        <p class="text-secondary small mb-3">
+                            Thank you for your purchase! A well-drafted confirmation email and order receipt has been sent to:
+                            <br>
+                            <strong class="text-dark">saikatdas7320@gmail.com</strong>
+                        </p>
+
+                        <div class="p-2 mb-3 bg-light rounded text-muted small" id="deliveryNote">
+                            <i class="bi bi-truck text-success"></i> Your order has been marked for dispatch and 7-day safe return.
+                        </div>
+
+                        <div class="d-flex justify-content-center gap-2 mt-4">
+                            <a href="/" class="btn-buy-retail py-2 px-4 text-decoration-none w-auto">
+                                <i class="bi bi-bag"></i> Continue Shopping
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Modal Body: Error Stage -->
+                    <div id="modalErrorStage" class="custom-modal-body text-center" style="display: none;">
+                        <div class="success-icon-wrapper" style="border-color: #ef4444; background: #fef2f2; color: #ef4444; box-shadow: 0 0 0 8px rgba(239, 68, 68, 0.15);">
+                            <i class="bi bi-exclamation-triangle"></i>
+                        </div>
+
+                        <h4 class="fw-bold text-dark mb-2">Order Could Not Be Completed</h4>
+                        <p class="text-secondary small mb-4" id="errorMessageText">
+                            Something went wrong while placing your order. Please try again.
+                        </p>
+
+                        <div class="d-flex justify-content-center gap-2">
+                            <button type="button" class="btn btn-secondary-retail py-2 px-4" onclick="closeCheckoutModal()">
+                                Close
+                            </button>
+                            <button type="button" class="btn-buy-retail py-2 px-4 w-auto m-0" onclick="resetToConfirmStage()">
+                                Try Again
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
         <% } %>
     </main>
+
+    <!-- Modal Controller Script -->
+    <script>
+        function openCheckoutModal() {
+            const modal = document.getElementById('checkoutCustomModal');
+            if (modal) {
+                resetToConfirmStage();
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeCheckoutModal() {
+            const modal = document.getElementById('checkoutCustomModal');
+            if (modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function handleBackdropClick(event) {
+            if (event.target.id === 'checkoutCustomModal') {
+                closeCheckoutModal();
+            }
+        }
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeCheckoutModal();
+            }
+        });
+
+        function resetToConfirmStage() {
+            document.getElementById('modalConfirmStage').style.display = 'block';
+            document.getElementById('modalSuccessStage').style.display = 'none';
+            document.getElementById('modalErrorStage').style.display = 'none';
+            document.getElementById('modalHeaderTitle').innerHTML = '<i class="bi bi-bag-check-fill text-warning"></i> Confirm Your Order';
+
+            const btn = document.getElementById('btnConfirmCheckout');
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Confirm & Place Order';
+            }
+        }
+
+        async function processCheckout() {
+            const btn = document.getElementById('btnConfirmCheckout');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Placing Order...';
+
+            try {
+                const response = await fetch('/cart/checkout', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    // Transition to Success Stage
+                    document.getElementById('modalConfirmStage').style.display = 'none';
+                    document.getElementById('modalErrorStage').style.display = 'none';
+                    document.getElementById('modalSuccessStage').style.display = 'block';
+                    document.getElementById('modalHeaderTitle').innerHTML = '<i class="bi bi-check-circle-fill text-success"></i> Order Confirmed';
+                    document.getElementById('displayOrderId').innerText = '#' + data.orderId;
+                } else {
+                    // Transition to Error Stage
+                    document.getElementById('modalConfirmStage').style.display = 'none';
+                    document.getElementById('modalSuccessStage').style.display = 'none';
+                    document.getElementById('modalErrorStage').style.display = 'block';
+                    document.getElementById('modalHeaderTitle').innerHTML = '<i class="bi bi-exclamation-circle text-danger"></i> Checkout Notice';
+                    document.getElementById('errorMessageText').innerText = data.message || 'Unable to place order. Please check your cart and try again.';
+                }
+            } catch (err) {
+                console.error('Checkout error:', err);
+                document.getElementById('modalConfirmStage').style.display = 'none';
+                document.getElementById('modalSuccessStage').style.display = 'none';
+                document.getElementById('modalErrorStage').style.display = 'block';
+                document.getElementById('modalHeaderTitle').innerHTML = '<i class="bi bi-exclamation-circle text-danger"></i> Checkout Notice';
+                document.getElementById('errorMessageText').innerText = 'Network error occurred. Please check your connection and try again.';
+            }
+        }
+    </script>
 
     <!-- Footer -->
     <footer class="footer-custom">

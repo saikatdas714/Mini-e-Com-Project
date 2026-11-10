@@ -199,17 +199,17 @@ app.get('/cart', authenticate, async (req, res) => {
 
 // Checkout must be defined BEFORE /cart/:id so 'checkout' is not treated as :id
 app.post('/cart/checkout', authenticate, async (req, res) => {
+    const isJson = req.xhr || req.headers.accept?.includes('application/json') || req.is('json');
+
     try {
         const userId = req.user.id;
         const cart = await getCart(userId);
 
         if (!cart || cart.length === 0) {
-            return res.send(`
-                <script>
-                    alert("Your cart is empty!");
-                    window.location.href = "/cart";
-                </script>
-            `);
+            if (isJson) {
+                return res.status(400).json({ success: false, message: 'Your cart is empty!' });
+            }
+            return res.redirect('/cart');
         }
 
         const user = (await getUserById(userId)) || req.user;
@@ -233,18 +233,25 @@ app.post('/cart/checkout', authenticate, async (req, res) => {
         // Clear cart after purchase
         await clearCart(userId);
 
-        const alertMessage = emailResult && emailResult.delivered
-            ? `Thank you! Your order #${orderId} has been placed successfully. A detailed purchase confirmation email has been sent to saikatdas7320@gmail.com.`
-            : `Thank you! Your order #${orderId} has been placed successfully! (Note: Configure EMAIL_USER and EMAIL_PASS in your .env file to enable live email delivery)`;
+        if (isJson) {
+            return res.json({
+                success: true,
+                orderId,
+                totalAmount,
+                emailSent: !!(emailResult && emailResult.delivered),
+                recipient: 'saikatdas7320@gmail.com',
+                message: emailResult && emailResult.delivered
+                    ? `Your order #${orderId} has been placed successfully! Confirmation email has been sent to saikatdas7320@gmail.com.`
+                    : `Your order #${orderId} has been placed successfully! (Email delivery is ready once EMAIL_USER & EMAIL_PASS are set in .env)`
+            });
+        }
 
-        res.send(`
-            <script>
-                alert(${JSON.stringify(alertMessage)});
-                window.location.href = "/cart";
-            </script>
-        `);
+        res.redirect('/cart');
     } catch (error) {
         console.error('Failed to complete checkout:', error);
+        if (isJson) {
+            return res.status(500).json({ success: false, message: 'Failed to process purchase checkout' });
+        }
         res.status(500).send('Failed to process purchase checkout');
     }
 });
