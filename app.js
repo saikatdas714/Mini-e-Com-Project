@@ -196,40 +196,8 @@ app.get('/cart', authenticate, async (req, res) => {
     }
 
 });
-app.post('/cart/:id', authenticate, async (req, res) => {
 
-    try {
-
-        const userId = req.user.id;
-        const productId = req.params.id;
-
-        await addToCart(userId, productId);
-
-        res.redirect('/cart');
-
-    } catch (error) {
-
-        console.error(error);
-        res.status(500).send('Failed to add product to cart');
-
-    }
-
-});
-app.post('/cart/remove/:id', authenticate, async (req, res) => {
-    try {
-        const userId = req.user.id;
-        const productId = req.params.id;
-
-        await removeFromCart(userId, productId);
-
-        res.redirect('/cart');
-
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Failed to remove product');
-    }
-});
-
+// Checkout must be defined BEFORE /cart/:id so 'checkout' is not treated as :id
 app.post('/cart/checkout', authenticate, async (req, res) => {
     try {
         const userId = req.user.id;
@@ -279,6 +247,41 @@ app.post('/cart/checkout', authenticate, async (req, res) => {
         console.error('Failed to complete checkout:', error);
         res.status(500).send('Failed to process purchase checkout');
     }
+});
+
+app.post('/cart/remove/:id', authenticate, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const productId = req.params.id;
+
+        await removeFromCart(userId, productId);
+
+        res.redirect('/cart');
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Failed to remove product');
+    }
+});
+
+app.post('/cart/:id', authenticate, async (req, res) => {
+
+    try {
+
+        const userId = req.user.id;
+        const productId = req.params.id;
+
+        await addToCart(userId, productId);
+
+        res.redirect('/cart');
+
+    } catch (error) {
+
+        console.error(error);
+        res.status(500).send('Failed to add product to cart');
+
+    }
+
 });
 app.get('/create-admin',authenticate,adminAuth, (req, res) => {
     res.render('create-admin');
