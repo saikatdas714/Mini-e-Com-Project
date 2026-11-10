@@ -208,73 +208,62 @@
                     <!-- Modal Body: Confirmation & Payment Stage -->
                     <div id="modalConfirmStage" class="custom-modal-body">
                         <!-- UPI QR Code Payment Box -->
-                        <div class="upi-qr-card text-center mb-3">
-                            <div class="fw-bold text-dark mb-1">Scan to Pay with Any UPI App</div>
-                            <div class="text-secondary small mb-2">Google Pay &bull; PhonePe &bull; Paytm &bull; BHIM</div>
+                        <div class="upi-qr-card text-center mb-2">
+                            <div class="fw-bold text-dark small mb-1">Scan & Pay with Any UPI App</div>
+                            <div class="text-secondary" style="font-size: 11px;">GPay &bull; PhonePe &bull; Paytm &bull; BHIM</div>
                             
                             <div class="d-flex justify-content-center my-2">
-                                <img src="/upi-qr.jpg" alt="Google Pay UPI QR Code" style="width: 175px; height: auto; border-radius: 8px; border: 1px solid #e2e8f0; display: block;" />
+                                <img src="/upi-qr.jpg" alt="Google Pay UPI QR Code" class="upi-qr-img" style="width: 135px; height: auto; border-radius: 8px; border: 1px solid #e2e8f0; display: block;" />
                             </div>
 
-                            <div class="d-flex align-items-center justify-content-center gap-2 mt-2">
-                                <span class="badge bg-light text-dark border font-monospace py-1 px-2">UPI ID: dalok7320-2@oksbi</span>
-                                <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="copyUpiId('dalok7320-2@oksbi', this)" title="Copy UPI ID">
+                            <div class="d-flex align-items-center justify-content-center gap-1 mt-1">
+                                <span class="badge bg-light text-dark border font-monospace py-1 px-2" style="font-size: 11px;">UPI: dalok7320-2@oksbi</span>
+                                <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size: 11px;" onclick="copyUpiId('dalok7320-2@oksbi', this)" title="Copy UPI ID">
                                     <i class="bi bi-clipboard"></i> Copy
                                 </button>
                             </div>
 
-                            <div class="fw-bold text-dark mt-2 pt-2 border-top">
+                            <div class="fw-bold text-dark mt-2 pt-1 border-top small">
                                 Amount to Pay: <span class="text-accent fs-6">₹<%= totalAmount.toLocaleString('en-IN') %></span>
                             </div>
                         </div>
 
                         <!-- Payment Screenshot Upload -->
-                        <div class="mb-3">
+                        <div class="mb-2">
                             <label class="form-label fw-bold text-dark small mb-1">
-                                Upload Payment Confirmation Screenshot <span class="text-danger">*</span>
+                                Upload Payment Screenshot <span class="text-danger">*</span>
                             </label>
                             <input type="file" id="paymentScreenshotInput" name="paymentProof" accept="image/*" class="d-none" onchange="handleScreenshotSelect(this)">
 
-                            <div id="uploadDropzone" class="upload-dropzone p-3 text-center" onclick="document.getElementById('paymentScreenshotInput').click()">
+                            <div id="uploadDropzone" class="upload-dropzone p-2 text-center" onclick="document.getElementById('paymentScreenshotInput').click()">
                                 <div id="dropzoneEmpty">
-                                    <i class="bi bi-cloud-arrow-up text-primary fs-3 d-block mb-1"></i>
-                                    <span class="small fw-semibold text-dark d-block">Click to upload payment screenshot</span>
-                                    <span class="text-secondary" style="font-size: 11px;">Supports PNG, JPG, JPEG, WEBP (Max 10MB)</span>
+                                    <i class="bi bi-cloud-arrow-up text-primary fs-4 d-block mb-1"></i>
+                                    <span class="small fw-semibold text-dark d-block">Tap here to upload screenshot</span>
+                                    <span class="text-secondary" style="font-size: 10px;">PNG, JPG, WEBP (Max 10MB)</span>
                                 </div>
                                 <div id="dropzonePreview" class="d-none align-items-center justify-content-between text-start gap-2">
                                     <div class="d-flex align-items-center gap-2 overflow-hidden">
-                                        <img id="screenshotThumb" src="" alt="Screenshot" style="width: 44px; height: 44px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1;">
+                                        <img id="screenshotThumb" src="" alt="Screenshot" style="width: 38px; height: 38px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1;">
                                         <div class="overflow-hidden">
-                                            <div id="screenshotFileName" class="small fw-bold text-dark text-truncate"></div>
-                                            <div id="screenshotFileSize" class="text-secondary" style="font-size: 11px;"></div>
+                                            <div id="screenshotFileName" class="small fw-bold text-dark text-truncate" style="font-size: 12px;"></div>
+                                            <div id="screenshotFileSize" class="text-secondary" style="font-size: 10px;"></div>
                                         </div>
                                     </div>
-                                    <button type="button" class="btn btn-sm btn-outline-danger py-1 px-2" onclick="removeScreenshot(event)">
+                                    <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2" onclick="removeScreenshot(event)">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </div>
                             </div>
-                            <div id="screenshotErrorMsg" class="text-danger small mt-1 d-none">
+                            <div id="screenshotErrorMsg" class="text-danger small mt-1 d-none" style="font-size: 11px;">
                                 <i class="bi bi-exclamation-circle"></i> Please upload your payment confirmation screenshot.
                             </div>
                         </div>
 
-                        <div class="modal-summary-box mb-3">
-                            <div class="modal-summary-row">
-                                <span>Items in Cart</span>
-                                <span class="fw-semibold text-dark"><%= cart.length %> items</span>
-                            </div>
-                            <div class="modal-summary-row total">
-                                <span>Total Amount</span>
-                                <span class="text-accent">₹<%= totalAmount.toLocaleString('en-IN') %></span>
-                            </div>
-                        </div>
-
-                        <div class="custom-modal-footer px-0 pb-0 mt-3 border-0 bg-transparent">
-                            <button type="button" class="btn btn-secondary-retail py-2 px-3" onclick="closeCheckoutModal()">
+                        <div class="custom-modal-footer px-0 pb-0 pt-2 border-0 bg-transparent mt-auto">
+                            <button type="button" class="btn btn-secondary-retail py-2 px-3 small" onclick="closeCheckoutModal()">
                                 Cancel
                             </button>
-                            <button type="button" class="btn-buy-retail py-2 px-4 w-auto m-0" id="btnConfirmCheckout" onclick="processCheckout()">
+                            <button type="button" class="btn-buy-retail py-2 px-3 flex-grow-1 m-0 small" id="btnConfirmCheckout" onclick="processCheckout()">
                                 <i class="bi bi-check-circle-fill"></i> Submit Payment & Order
                             </button>
                         </div>

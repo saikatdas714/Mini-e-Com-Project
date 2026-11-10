@@ -310,20 +310,12 @@ async function sendPurchaseNotification({ to = 'saikatdas7320@gmail.com', orderI
                 content: paymentScreenshot.buffer,
                 cid: 'paymentScreenshot'
             });
-            attachments.push({
-                filename: `Payment-Proof-${paymentScreenshot.originalname || 'screenshot.jpg'}`,
-                content: paymentScreenshot.buffer
-            });
         } else if (paymentScreenshot.path) {
             const resolvedPath = path.resolve(paymentScreenshot.path);
             attachments.push({
                 filename: paymentScreenshot.originalname || 'payment-screenshot.jpg',
                 path: resolvedPath,
                 cid: 'paymentScreenshot'
-            });
-            attachments.push({
-                filename: `Payment-Proof-${paymentScreenshot.originalname || 'screenshot.jpg'}`,
-                path: resolvedPath
             });
         }
     }

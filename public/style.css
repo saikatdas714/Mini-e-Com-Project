@@ -999,3 +999,44 @@ a:hover {
     letter-spacing: 0.5px;
     margin-bottom: 0.75rem;
 }
+
+/* Mobile Responsive Custom Modals */
+@media (max-width: 576px) {
+    .custom-modal-backdrop {
+        padding: 0;
+        align-items: flex-end;
+    }
+
+    .custom-modal-card {
+        max-width: 100% !important;
+        max-height: 88vh !important;
+        border-radius: 18px 18px 0 0 !important;
+        margin: 0 !important;
+    }
+
+    .custom-modal-header {
+        padding: 0.75rem 1rem;
+    }
+
+    .custom-modal-body {
+        padding: 0.75rem 1rem;
+    }
+
+    .custom-modal-footer {
+        padding: 0.65rem 1rem;
+        background: #ffffff;
+    }
+
+    .upi-qr-card {
+        padding: 0.5rem !important;
+        margin-bottom: 0.6rem !important;
+    }
+
+    .upi-qr-img {
+        width: 115px !important;
+    }
+
+    .upload-dropzone {
+        padding: 0.6rem 0.75rem !important;
+    }
+}
