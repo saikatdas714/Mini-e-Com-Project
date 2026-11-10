@@ -233,7 +233,10 @@
                                     <span class="text-success small fw-bold">Free Delivery</span>
                                 </div>
 
-                                <form action="/cart/<%= element.id %>" method="POST" class="m-0 mt-auto">
+                                <form action="/cart/<%= element.id %>" method="POST" class="m-0 mt-auto add-to-cart-form"
+                                      data-name="<%= element.name %>"
+                                      data-price="₹<%= Number(element.price).toLocaleString('en-IN') %>"
+                                      data-image="<%= element.image || '' %>">
                                     <button type="submit" class="btn btn-cart-retail w-100">
                                         <i class="bi bi-cart-plus-fill"></i> Add to Cart
                                     </button>
@@ -245,6 +248,180 @@
             </div>
         <% } %>
     </main>
+
+    <!-- Custom Animated "Added to Cart" Modal -->
+    <div id="addToCartCustomModal" class="custom-modal-backdrop" onclick="handleAddToCartBackdrop(event)">
+        <div class="custom-modal-card">
+            <!-- Header -->
+            <div class="custom-modal-header">
+                <h5 class="custom-modal-title">
+                    <i class="bi bi-bag-check-fill text-warning"></i> Added to Cart!
+                </h5>
+                <button type="button" class="custom-modal-close-btn" onclick="closeAddToCartModal()" aria-label="Close">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+            <!-- Body -->
+            <div class="custom-modal-body">
+                <div class="success-icon-wrapper" style="width: 64px; height: 64px; font-size: 2rem; margin-bottom: 1rem;">
+                    <i class="bi bi-check2"></i>
+                </div>
+
+                <h4 class="fs-5 fw-bold text-center text-dark mb-1">Item Added to Cart!</h4>
+                <p class="text-secondary text-center small mb-3">The product is now in your cart and ready for checkout.</p>
+
+                <!-- Product Preview in Modal -->
+                <div class="d-flex align-items-center gap-3 p-3 bg-light rounded border mb-4 text-start">
+                    <img id="modalProductImg" src="" alt="Product" style="width: 55px; height: 55px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0;"
+                         onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=150&auto=format&fit=crop&q=80';">
+                    <div class="flex-grow-1 overflow-hidden">
+                        <div id="modalProductName" class="fw-bold text-dark text-truncate small mb-1"></div>
+                        <div id="modalProductPrice" class="text-accent fw-bold small"></div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex gap-2 justify-content-center">
+                    <button type="button" class="btn btn-secondary-retail py-2 px-3 flex-grow-1" onclick="closeAddToCartModal()">
+                        <i class="bi bi-arrow-left"></i> Keep Shopping
+                    </button>
+                    <a href="/cart" class="btn-buy-retail py-2 px-3 text-decoration-none text-center flex-grow-1">
+                        <i class="bi bi-cart3"></i> View Cart & Checkout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Animated "Login Required" Modal -->
+    <div id="loginRequiredModal" class="custom-modal-backdrop" onclick="handleLoginBackdrop(event)">
+        <div class="custom-modal-card">
+            <div class="custom-modal-header">
+                <h5 class="custom-modal-title">
+                    <i class="bi bi-lock-fill text-warning"></i> Sign In Required
+                </h5>
+                <button type="button" class="custom-modal-close-btn" onclick="closeLoginModal()" aria-label="Close">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="custom-modal-body text-center">
+                <div class="success-icon-wrapper" style="border-color: #3b82f6; background: #eff6ff; color: #2563eb; width: 64px; height: 64px; font-size: 1.8rem; margin-bottom: 1rem; box-shadow: 0 0 0 8px rgba(59, 130, 246, 0.15);">
+                    <i class="bi bi-person-lock"></i>
+                </div>
+                <h4 class="fs-5 fw-bold text-dark mb-1">Please Sign In First</h4>
+                <p class="text-secondary small mb-4">You need to sign in to your Mini e-Com account to add items to your cart.</p>
+                <div class="d-flex gap-2 justify-content-center">
+                    <button type="button" class="btn btn-secondary-retail py-2 px-3" onclick="closeLoginModal()">
+                        Cancel
+                    </button>
+                    <a href="/login" class="btn-buy-retail py-2 px-4 text-decoration-none">
+                        <i class="bi bi-box-arrow-in-right"></i> Sign In
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script: AJAX Add To Cart & Modal Control -->
+    <script>
+        document.querySelectorAll('.add-to-cart-form').forEach(form => {
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                const btn = this.querySelector('button');
+                const originalHtml = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Adding...';
+
+                try {
+                    const response = await fetch(this.action, {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const data = await response.json();
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+
+                    if (response.status === 401 || data.requireLogin) {
+                        openLoginModal();
+                        return;
+                    }
+
+                    if (response.ok && data.success) {
+                        openAddToCartModal({
+                            name: this.dataset.name,
+                            price: this.dataset.price,
+                            image: this.dataset.image
+                        });
+                    } else {
+                        alert(data.message || 'Could not add product to cart.');
+                    }
+                } catch (err) {
+                    console.error('Error adding to cart:', err);
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+                }
+            });
+        });
+
+        function openAddToCartModal(product) {
+            const modal = document.getElementById('addToCartCustomModal');
+            document.getElementById('modalProductName').innerText = product.name || 'Product';
+            document.getElementById('modalProductPrice').innerText = product.price || '';
+            document.getElementById('modalProductImg').src = product.image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=150&auto=format&fit=crop&q=80';
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeAddToCartModal() {
+            const modal = document.getElementById('addToCartCustomModal');
+            if (modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function handleAddToCartBackdrop(e) {
+            if (e.target.id === 'addToCartCustomModal') {
+                closeAddToCartModal();
+            }
+        }
+
+        function openLoginModal() {
+            const modal = document.getElementById('loginRequiredModal');
+            if (modal) {
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeLoginModal() {
+            const modal = document.getElementById('loginRequiredModal');
+            if (modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function handleLoginBackdrop(e) {
+            if (e.target.id === 'loginRequiredModal') {
+                closeLoginModal();
+            }
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeAddToCartModal();
+                closeLoginModal();
+            }
+        });
+    </script>
 
     <!-- Footer -->
     <footer class="footer-custom">

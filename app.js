@@ -272,23 +272,30 @@ app.post('/cart/remove/:id', authenticate, async (req, res) => {
 });
 
 app.post('/cart/:id', authenticate, async (req, res) => {
+    const isJson = req.xhr || req.headers.accept?.includes('application/json') || req.is('json');
 
     try {
-
         const userId = req.user.id;
         const productId = req.params.id;
 
         await addToCart(userId, productId);
 
+        if (isJson) {
+            return res.json({
+                success: true,
+                message: 'Product added to cart successfully!'
+            });
+        }
+
         res.redirect('/cart');
 
     } catch (error) {
-
         console.error(error);
+        if (isJson) {
+            return res.status(500).json({ success: false, message: 'Failed to add product to cart' });
+        }
         res.status(500).send('Failed to add product to cart');
-
     }
-
 });
 app.get('/create-admin',authenticate,adminAuth, (req, res) => {
     res.render('create-admin');
