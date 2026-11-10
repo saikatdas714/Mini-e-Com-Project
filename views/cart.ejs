@@ -179,9 +179,11 @@
                                 <span>₹<%= totalAmount.toLocaleString('en-IN') %></span>
                             </div>
 
-                            <button type="button" class="btn-buy-retail" onclick="alert('Proceeding to Secure Checkout!')">
-                                <i class="bi bi-lightning-fill"></i> PLACE ORDER
-                            </button>
+                            <form action="/cart/checkout" method="POST" class="m-0" onsubmit="const btn = this.querySelector('button'); btn.disabled = true; btn.innerHTML = '<span class=\'spinner-border spinner-border-sm me-2\'></span>Processing Order...';">
+                                <button type="submit" class="btn-buy-retail">
+                                    <i class="bi bi-lightning-fill"></i> PLACE ORDER
+                                </button>
+                            </form>
 
                             <div class="text-center mt-3 text-secondary small">
                                 <i class="bi bi-lock-fill text-success"></i> 256-Bit Bank Grade Security

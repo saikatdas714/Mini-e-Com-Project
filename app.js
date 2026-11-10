@@ -29,8 +29,10 @@ const {
 const {
     addToCart,
     getCart,
-    removeFromCart
+    removeFromCart,
+    clearCart
 } = require('./controllers/cartController');
+const { sendPurchaseNotification } = require('./services/emailService');
 
 const app = express();
 const port = 3000;
@@ -224,6 +226,57 @@ app.post('/cart/remove/:id', authenticate, async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).send('Failed to remove product');
+    }
+});
+
+app.post('/cart/checkout', authenticate, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const cart = await getCart(userId);
+
+        if (!cart || cart.length === 0) {
+            return res.send(`
+                <script>
+                    alert("Your cart is empty!");
+                    window.location.href = "/cart";
+                </script>
+            `);
+        }
+
+        const user = (await getUserById(userId)) || req.user;
+        const totalAmount = cart.reduce((sum, item) => sum + (Number(item.price) || 0), 0);
+        const orderId = 'ORD-' + Date.now().toString(36).toUpperCase() + '-' + Math.floor(1000 + Math.random() * 9000);
+
+        // Send purchase notification email to saikatdas7320@gmail.com
+        let emailResult = { delivered: false };
+        try {
+            emailResult = await sendPurchaseNotification({
+                to: 'saikatdas7320@gmail.com',
+                orderId,
+                customer: user,
+                items: cart,
+                totalAmount
+            });
+        } catch (emailErr) {
+            console.error('[Checkout] Error dispatching email notification:', emailErr.message);
+        }
+
+        // Clear cart after purchase
+        await clearCart(userId);
+
+        const alertMessage = emailResult && emailResult.delivered
+            ? `Thank you! Your order #${orderId} has been placed successfully. A detailed purchase confirmation email has been sent to saikatdas7320@gmail.com.`
+            : `Thank you! Your order #${orderId} has been placed successfully! (Note: Configure EMAIL_USER and EMAIL_PASS in your .env file to enable live email delivery)`;
+
+        res.send(`
+            <script>
+                alert(${JSON.stringify(alertMessage)});
+                window.location.href = "/cart";
+            </script>
+        `);
+    } catch (error) {
+        console.error('Failed to complete checkout:', error);
+        res.status(500).send('Failed to process purchase checkout');
     }
 });
 app.get('/create-admin',authenticate,adminAuth, (req, res) => {

@@ -64,8 +64,21 @@ async function removeFromCart(userId, productId) {
     }
 }
 
+// CLEAR ALL PRODUCTS FROM USER CART
+async function clearCart(userId) {
+    const { error } = await supabase
+        .from('cart')
+        .delete()
+        .eq('user_id', userId);
+
+    if (error) {
+        throw new Error(error.message);
+    }
+}
+
 module.exports = {
     addToCart,
     getCart,
-    removeFromCart
+    removeFromCart,
+    clearCart
 };
