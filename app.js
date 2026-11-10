@@ -2,6 +2,8 @@ require('dotenv').config();
 const { log } = require('console');
 const express = require('express')
 const path = require('path')
+const fs = require('fs');
+const multer = require('multer');
 const connection = require('./model/connection')
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
@@ -29,6 +31,7 @@ const {
 const {
     addToCart,
     getCart,
+    getCartCount,
     removeFromCart,
     clearCart
 } = require('./controllers/cartController');
@@ -44,13 +47,15 @@ app.set('view engine', 'ejs')
 app.use(cookieParser());
 
 // Global user session middleware for all views
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
     const token = req.cookies.token;
+    res.locals.cartCount = 0;
     if (token) {
         try {
             const user = jwt.verify(token, process.env.JWT_SECRET);
             res.locals.user = user;
             req.user = user;
+            res.locals.cartCount = await getCartCount(user.id);
         } catch (e) {
             res.locals.user = null;
         }
@@ -197,9 +202,38 @@ app.get('/cart', authenticate, async (req, res) => {
 
 });
 
+// Configure multer storage for payment screenshot uploads
+const uploadDir = path.join(process.cwd(), 'public', 'uploads');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, uploadDir);
+    },
+    filename: (req, file, cb) => {
+        const ext = path.extname(file.originalname) || '.jpg';
+        const uniqueName = `payment-${Date.now()}-${Math.round(Math.random() * 1E9)}${ext}`;
+        cb(null, uniqueName);
+    }
+});
+
+const upload = multer({
+    storage,
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only image files (JPG, PNG, WEBP) are allowed'));
+        }
+    }
+});
+
 // Checkout must be defined BEFORE /cart/:id so 'checkout' is not treated as :id
-app.post('/cart/checkout', authenticate, async (req, res) => {
-    const isJson = req.xhr || req.headers.accept?.includes('application/json') || req.is('json');
+app.post('/cart/checkout', authenticate, upload.single('paymentProof'), async (req, res) => {
+    const isJson = req.xhr || req.headers.accept?.includes('application/json') || req.is('json') || req.headers['x-requested-with'] === 'XMLHttpRequest';
 
     try {
         const userId = req.user.id;
@@ -212,11 +246,18 @@ app.post('/cart/checkout', authenticate, async (req, res) => {
             return res.redirect('/cart');
         }
 
+        if (!req.file) {
+            if (isJson) {
+                return res.status(400).json({ success: false, message: 'Please upload your payment confirmation screenshot.' });
+            }
+            return res.redirect('/cart');
+        }
+
         const user = (await getUserById(userId)) || req.user;
         const totalAmount = cart.reduce((sum, item) => sum + (Number(item.price) || 0), 0);
         const orderId = 'ORD-' + Date.now().toString(36).toUpperCase() + '-' + Math.floor(1000 + Math.random() * 9000);
 
-        // Send purchase notification email to saikatdas7320@gmail.com
+        // Send purchase notification email with attached payment screenshot to saikatdas7320@gmail.com
         let emailResult = { delivered: false };
         try {
             emailResult = await sendPurchaseNotification({
@@ -224,7 +265,12 @@ app.post('/cart/checkout', authenticate, async (req, res) => {
                 orderId,
                 customer: user,
                 items: cart,
-                totalAmount
+                totalAmount,
+                paymentScreenshot: {
+                    path: req.file.path,
+                    originalname: req.file.originalname,
+                    filename: req.file.filename
+                }
             });
         } catch (emailErr) {
             console.error('[Checkout] Error dispatching email notification:', emailErr.message);
@@ -247,7 +293,7 @@ app.post('/cart/checkout', authenticate, async (req, res) => {
     } catch (error) {
         console.error('Failed to complete checkout:', error);
         if (isJson) {
-            return res.status(500).json({ success: false, message: 'Failed to process purchase checkout' });
+            return res.status(500).json({ success: false, message: error.message || 'Failed to process purchase checkout' });
         }
         res.status(500).send('Failed to process purchase checkout');
     }
@@ -276,10 +322,12 @@ app.post('/cart/:id', authenticate, async (req, res) => {
         const productId = req.params.id;
 
         await addToCart(userId, productId);
+        const cartCount = await getCartCount(userId);
 
         if (isJson) {
             return res.json({
                 success: true,
+                cartCount,
                 message: 'Product added to cart successfully!'
             });
         }

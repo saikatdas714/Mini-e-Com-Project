@@ -46,7 +46,12 @@
                         <a class="nav-link" href="/"><i class="bi bi-house-door"></i> Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="/cart"><i class="bi bi-cart3"></i> Cart</a>
+                        <a class="nav-link active" href="/cart">
+                            <i class="bi bi-cart3"></i> Cart
+                            <span class="badge rounded-pill bg-warning text-dark ms-1 nav-cart-badge" id="navCartBadge" style="<%= (typeof cartCount !== 'undefined' && cartCount > 0) ? '' : 'display: none;' %>">
+                                <%= (typeof cartCount !== 'undefined' && cartCount > 0) ? cartCount : '' %>
+                            </span>
+                        </a>
                     </li>
                     <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
                         <li class="nav-item">
@@ -193,34 +198,74 @@
                     <!-- Modal Header -->
                     <div class="custom-modal-header">
                         <h5 class="custom-modal-title" id="modalHeaderTitle">
-                            <i class="bi bi-bag-check-fill text-warning"></i> Confirm Your Order
+                            <i class="bi bi-qr-code-scan text-warning"></i> Complete UPI Payment
                         </h5>
                         <button type="button" class="custom-modal-close-btn" onclick="closeCheckoutModal()" aria-label="Close">
                             <i class="bi bi-x-lg"></i>
                         </button>
                     </div>
 
-                    <!-- Modal Body: Confirmation Stage -->
+                    <!-- Modal Body: Confirmation & Payment Stage -->
                     <div id="modalConfirmStage" class="custom-modal-body">
-                        <p class="text-secondary small mb-3">
-                            Please review your order summary below. Once confirmed, your order will be placed immediately.
-                        </p>
+                        <!-- UPI QR Code Payment Box -->
+                        <div class="upi-qr-card text-center mb-3">
+                            <div class="fw-bold text-dark mb-1">Scan to Pay with Any UPI App</div>
+                            <div class="text-secondary small mb-2">Google Pay &bull; PhonePe &bull; Paytm &bull; BHIM</div>
+                            
+                            <div class="d-flex justify-content-center my-2">
+                                <img src="/upi-qr.jpg" alt="Google Pay UPI QR Code" style="width: 175px; height: auto; border-radius: 8px; border: 1px solid #e2e8f0; display: block;" />
+                            </div>
 
-                        <div class="modal-summary-box">
+                            <div class="d-flex align-items-center justify-content-center gap-2 mt-2">
+                                <span class="badge bg-light text-dark border font-monospace py-1 px-2">UPI ID: dalok7320-2@oksbi</span>
+                                <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="copyUpiId('dalok7320-2@oksbi', this)" title="Copy UPI ID">
+                                    <i class="bi bi-clipboard"></i> Copy
+                                </button>
+                            </div>
+
+                            <div class="fw-bold text-dark mt-2 pt-2 border-top">
+                                Amount to Pay: <span class="text-accent fs-6">₹<%= totalAmount.toLocaleString('en-IN') %></span>
+                            </div>
+                        </div>
+
+                        <!-- Payment Screenshot Upload -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-dark small mb-1">
+                                Upload Payment Confirmation Screenshot <span class="text-danger">*</span>
+                            </label>
+                            <input type="file" id="paymentScreenshotInput" name="paymentProof" accept="image/*" class="d-none" onchange="handleScreenshotSelect(this)">
+
+                            <div id="uploadDropzone" class="upload-dropzone p-3 text-center" onclick="document.getElementById('paymentScreenshotInput').click()">
+                                <div id="dropzoneEmpty">
+                                    <i class="bi bi-cloud-arrow-up text-primary fs-3 d-block mb-1"></i>
+                                    <span class="small fw-semibold text-dark d-block">Click to upload payment screenshot</span>
+                                    <span class="text-secondary" style="font-size: 11px;">Supports PNG, JPG, JPEG, WEBP (Max 10MB)</span>
+                                </div>
+                                <div id="dropzonePreview" class="d-none align-items-center justify-content-between text-start gap-2">
+                                    <div class="d-flex align-items-center gap-2 overflow-hidden">
+                                        <img id="screenshotThumb" src="" alt="Screenshot" style="width: 44px; height: 44px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1;">
+                                        <div class="overflow-hidden">
+                                            <div id="screenshotFileName" class="small fw-bold text-dark text-truncate"></div>
+                                            <div id="screenshotFileSize" class="text-secondary" style="font-size: 11px;"></div>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-outline-danger py-1 px-2" onclick="removeScreenshot(event)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="screenshotErrorMsg" class="text-danger small mt-1 d-none">
+                                <i class="bi bi-exclamation-circle"></i> Please upload your payment confirmation screenshot.
+                            </div>
+                        </div>
+
+                        <div class="modal-summary-box mb-3">
                             <div class="modal-summary-row">
                                 <span>Items in Cart</span>
                                 <span class="fw-semibold text-dark"><%= cart.length %> items</span>
                             </div>
-                            <div class="modal-summary-row">
-                                <span>Subtotal</span>
-                                <span class="text-dark">₹<%= subtotal.toLocaleString('en-IN') %></span>
-                            </div>
-                            <div class="modal-summary-row">
-                                <span>Delivery Fee</span>
-                                <span class="text-success fw-bold">FREE</span>
-                            </div>
                             <div class="modal-summary-row total">
-                                <span>Total Payable</span>
+                                <span>Total Amount</span>
                                 <span class="text-accent">₹<%= totalAmount.toLocaleString('en-IN') %></span>
                             </div>
                         </div>
@@ -230,7 +275,7 @@
                                 Cancel
                             </button>
                             <button type="button" class="btn-buy-retail py-2 px-4 w-auto m-0" id="btnConfirmCheckout" onclick="processCheckout()">
-                                <i class="bi bi-check-circle-fill"></i> Confirm & Place Order
+                                <i class="bi bi-check-circle-fill"></i> Submit Payment & Order
                             </button>
                         </div>
                     </div>
@@ -314,27 +359,97 @@
             document.getElementById('modalConfirmStage').style.display = 'block';
             document.getElementById('modalSuccessStage').style.display = 'none';
             document.getElementById('modalErrorStage').style.display = 'none';
-            document.getElementById('modalHeaderTitle').innerHTML = '<i class="bi bi-bag-check-fill text-warning"></i> Confirm Your Order';
+            document.getElementById('modalHeaderTitle').innerHTML = '<i class="bi bi-qr-code-scan text-warning"></i> Complete UPI Payment';
 
             const btn = document.getElementById('btnConfirmCheckout');
             if (btn) {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Confirm & Place Order';
+                btn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Submit Payment & Order';
+            }
+        }
+
+        function copyUpiId(text, btn) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    const original = btn.innerHTML;
+                    btn.innerHTML = '<i class="bi bi-check"></i> Copied!';
+                    btn.classList.add('btn-success');
+                    btn.classList.remove('btn-outline-secondary');
+                    setTimeout(() => {
+                        btn.innerHTML = original;
+                        btn.classList.remove('btn-success');
+                        btn.classList.add('btn-outline-secondary');
+                    }, 2000);
+                });
+            }
+        }
+
+        function handleScreenshotSelect(input) {
+            const dropzone = document.getElementById('uploadDropzone');
+            const errorMsg = document.getElementById('screenshotErrorMsg');
+            const dropzoneEmpty = document.getElementById('dropzoneEmpty');
+            const dropzonePreview = document.getElementById('dropzonePreview');
+            const thumb = document.getElementById('screenshotThumb');
+            const nameEl = document.getElementById('screenshotFileName');
+            const sizeEl = document.getElementById('screenshotFileSize');
+
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                dropzone.classList.remove('has-error');
+                errorMsg.classList.add('d-none');
+
+                nameEl.innerText = file.name;
+                sizeEl.innerText = (file.size / 1024).toFixed(1) + ' KB';
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    thumb.src = e.target.result;
+                    dropzoneEmpty.classList.add('d-none');
+                    dropzonePreview.classList.remove('d-none');
+                    dropzonePreview.classList.add('d-flex');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function removeScreenshot(event) {
+            if (event) event.stopPropagation();
+            const input = document.getElementById('paymentScreenshotInput');
+            if (input) input.value = '';
+            const dropzoneEmpty = document.getElementById('dropzoneEmpty');
+            const dropzonePreview = document.getElementById('dropzonePreview');
+            if (dropzoneEmpty) dropzoneEmpty.classList.remove('d-none');
+            if (dropzonePreview) {
+                dropzonePreview.classList.remove('d-flex');
+                dropzonePreview.classList.add('d-none');
             }
         }
 
         async function processCheckout() {
+            const fileInput = document.getElementById('paymentScreenshotInput');
+            const errorMsg = document.getElementById('screenshotErrorMsg');
+            const dropzone = document.getElementById('uploadDropzone');
+
+            if (!fileInput || !fileInput.files || !fileInput.files[0]) {
+                errorMsg.classList.remove('d-none');
+                dropzone.classList.add('has-error');
+                return;
+            }
+
             const btn = document.getElementById('btnConfirmCheckout');
             btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Placing Order...';
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Submitting Order...';
+
+            const formData = new FormData();
+            formData.append('paymentProof', fileInput.files[0]);
 
             try {
                 const response = await fetch('/cart/checkout', {
                     method: 'POST',
                     headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    }
+                        'Accept': 'application/json'
+                    },
+                    body: formData
                 });
 
                 const data = await response.json();
@@ -345,6 +460,12 @@
                     document.getElementById('modalErrorStage').style.display = 'none';
                     document.getElementById('modalSuccessStage').style.display = 'block';
                     document.getElementById('modalHeaderTitle').innerHTML = '<i class="bi bi-check-circle-fill text-success"></i> Order Confirmed';
+
+                    const navBadge = document.getElementById('navCartBadge');
+                    if (navBadge) {
+                        navBadge.innerText = '';
+                        navBadge.style.display = 'none';
+                    }
                 } else {
                     // Transition to Error Stage
                     document.getElementById('modalConfirmStage').style.display = 'none';

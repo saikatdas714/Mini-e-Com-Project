@@ -34,7 +34,7 @@ function createTransporter() {
 /**
  * Generates responsive, beautifully styled HTML for purchase notification.
  */
-function generateOrderHtml({ orderId, orderDate, customer, items, totalAmount }) {
+function generateOrderHtml({ orderId, orderDate, customer, items, totalAmount, paymentScreenshot }) {
     const formattedTotal = Number(totalAmount).toLocaleString('en-IN', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
@@ -67,6 +67,23 @@ function generateOrderHtml({ orderId, orderDate, customer, items, totalAmount })
         `;
     }).join('');
 
+    const paymentProofHtml = paymentScreenshot ? `
+        <!-- Payment Screenshot Proof -->
+        <tr>
+            <td style="padding: 20px 32px 10px 32px;">
+                <h3 style="font-size: 16px; font-weight: 700; color: #111827; margin: 0 0 10px 0; border-bottom: 2px solid #f3f4f6; padding-bottom: 8px;">
+                    📸 Payment Confirmation Screenshot
+                </h3>
+                <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px; text-align: center;">
+                    <img src="cid:paymentScreenshot" alt="Payment Confirmation Screenshot" style="max-width: 100%; max-height: 480px; border-radius: 6px; border: 1px solid #d1d5db; display: inline-block; box-shadow: 0 2px 6px rgba(0,0,0,0.08);" />
+                    <div style="margin-top: 10px; font-size: 13px; color: #4b5563; font-weight: 500;">
+                        Attached Proof: <strong>${paymentScreenshot.originalname || 'payment-screenshot.jpg'}</strong>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    ` : '';
+
     return `
     <!DOCTYPE html>
     <html lang="en">
@@ -91,7 +108,7 @@ function generateOrderHtml({ orderId, orderDate, customer, items, totalAmount })
                                     Mini e-Com
                                 </h1>
                                 <p style="color: #cbd5e1; margin: 0; font-size: 14px;">
-                                    Order Purchase Confirmation
+                                    Order Purchase Confirmation & Payment Proof
                                 </p>
                             </td>
                         </tr>
@@ -101,10 +118,10 @@ function generateOrderHtml({ orderId, orderDate, customer, items, totalAmount })
                             <td style="padding: 24px 32px 10px 32px;">
                                 <div style="background-color: #ecfdf5; border-left: 4px solid #10b981; padding: 14px 18px; border-radius: 6px;">
                                     <div style="color: #065f46; font-weight: 700; font-size: 15px;">
-                                        Order Confirmed!
+                                        Order Placed with Payment Proof
                                     </div>
                                     <div style="color: #047857; font-size: 13px; margin-top: 3px;">
-                                        A new purchase order has been successfully placed from the cart.
+                                        A new purchase order has been placed. Payment screenshot is attached below for verification.
                                     </div>
                                 </div>
                             </td>
@@ -131,8 +148,8 @@ function generateOrderHtml({ orderId, orderDate, customer, items, totalAmount })
                                         <td style="padding: 6px 10px; font-size: 13px; color: #111827;">${customer.email || 'N/A'}</td>
                                     </tr>
                                     <tr>
-                                        <td style="padding: 6px 10px; font-size: 13px; color: #6b7280;">Payment Status:</td>
-                                        <td style="padding: 6px 10px; font-size: 13px; color: #10b981; font-weight: 700;">Confirmed / Paid</td>
+                                        <td style="padding: 6px 10px; font-size: 13px; color: #6b7280;">Payment Method:</td>
+                                        <td style="padding: 6px 10px; font-size: 13px; color: #10b981; font-weight: 700;">UPI (Screenshot Submitted)</td>
                                     </tr>
                                 </table>
                             </td>
@@ -175,28 +192,16 @@ function generateOrderHtml({ orderId, orderDate, customer, items, totalAmount })
                             </td>
                         </tr>
 
-                        <!-- Dispatch Notice -->
-                        <tr>
-                            <td style="padding: 0 32px 24px 32px;">
-                                <div style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px 18px;">
-                                    <div style="font-weight: 600; color: #1e40af; font-size: 14px; margin-bottom: 2px;">
-                                        📦 Dispatch & Shipping Information
-                                    </div>
-                                    <div style="color: #3b82f6; font-size: 12px; line-height: 1.5;">
-                                        This order is now marked for processing. Fast and trackable dispatch will be scheduled within 24-48 hours.
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
+                        ${paymentProofHtml}
 
                         <!-- Footer -->
                         <tr>
                             <td style="background-color: #f9fafb; padding: 24px 32px; border-top: 1px solid #e5e7eb; text-align: center;">
                                 <p style="margin: 0 0 6px 0; font-size: 13px; color: #6b7280; font-weight: 500;">
-                                    Thank you for choosing <strong>Mini e-Com</strong>.
+                                    <strong>Mini e-Com</strong> Order Management System
                                 </p>
                                 <p style="margin: 0; font-size: 11px; color: #9ca3af;">
-                                    &copy; 2026 Mini e-Com Project. Designed by Saikat Das.
+                                    &copy; 2026 Mini e-Com. Designed by Saikat Das.
                                 </p>
                             </td>
                         </tr>
@@ -213,7 +218,7 @@ function generateOrderHtml({ orderId, orderDate, customer, items, totalAmount })
 /**
  * Generates plain-text version for email clients that do not render HTML.
  */
-function generateOrderText({ orderId, orderDate, customer, items, totalAmount }) {
+function generateOrderText({ orderId, orderDate, customer, items, totalAmount, paymentScreenshot }) {
     const formattedTotal = Number(totalAmount).toLocaleString('en-IN', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
@@ -227,6 +232,10 @@ function generateOrderText({ orderId, orderDate, customer, items, totalAmount })
         return `${index + 1}. ${item.name} - ₹${itemPrice}\n   Description: ${item.description || 'N/A'}`;
     }).join('\n\n');
 
+    const paymentText = paymentScreenshot
+        ? `Payment Proof Screenshot: Attached (${paymentScreenshot.originalname || 'payment-screenshot.jpg'})\n`
+        : '';
+
     return `
 ========================================
 MINI E-COM - ORDER PURCHASE CONFIRMATION
@@ -237,7 +246,7 @@ Order Date: ${orderDate}
 Customer Name: ${customer.name || 'Valued Customer'}
 Customer Email: ${customer.email || 'N/A'}
 Payment Status: Confirmed / Paid
-
+${paymentText}
 ----------------------------------------
 PURCHASED ITEMS (${items.length}):
 ----------------------------------------
@@ -265,8 +274,9 @@ Thank you for your purchase with Mini e-Com!
  * @param {Object} options.customer - Customer details { id, name, email }
  * @param {Array} options.items - Cart items purchased
  * @param {number} options.totalAmount - Total order price
+ * @param {Object} [options.paymentScreenshot] - Optional screenshot metadata { path, originalname }
  */
-async function sendPurchaseNotification({ to = 'saikatdas7320@gmail.com', orderId, customer, items, totalAmount }) {
+async function sendPurchaseNotification({ to = 'saikatdas7320@gmail.com', orderId, customer, items, totalAmount, paymentScreenshot }) {
     const transporter = createTransporter();
 
     const orderDate = new Date().toLocaleString('en-IN', {
@@ -275,8 +285,8 @@ async function sendPurchaseNotification({ to = 'saikatdas7320@gmail.com', orderI
         timeStyle: 'short'
     });
 
-    const htmlContent = generateOrderHtml({ orderId, orderDate, customer, items, totalAmount });
-    const textContent = generateOrderText({ orderId, orderDate, customer, items, totalAmount });
+    const htmlContent = generateOrderHtml({ orderId, orderDate, customer, items, totalAmount, paymentScreenshot });
+    const textContent = generateOrderText({ orderId, orderDate, customer, items, totalAmount, paymentScreenshot });
 
     if (!transporter) {
         console.warn('\n[Email Service Warning]: EMAIL_USER / EMAIL_PASS or SMTP credentials are not configured in .env.');
@@ -288,12 +298,22 @@ async function sendPurchaseNotification({ to = 'saikatdas7320@gmail.com', orderI
         };
     }
 
+    const attachments = [];
+    if (paymentScreenshot && paymentScreenshot.path) {
+        attachments.push({
+            filename: paymentScreenshot.originalname || 'payment-screenshot.jpg',
+            path: paymentScreenshot.path,
+            cid: 'paymentScreenshot'
+        });
+    }
+
     const mailOptions = {
         from: process.env.EMAIL_FROM || `"Mini e-Com" <${process.env.EMAIL_USER}>`,
         to: to,
-        subject: `🛒 Order Confirmation #${orderId} - Mini e-Com`,
+        subject: `🛒 Order Confirmation #${orderId} (Payment Proof Attached) - Mini e-Com`,
         text: textContent,
-        html: htmlContent
+        html: htmlContent,
+        attachments
     };
 
     const info = await transporter.sendMail(mailOptions);
