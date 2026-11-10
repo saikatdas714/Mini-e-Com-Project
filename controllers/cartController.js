@@ -51,6 +51,20 @@ async function getCart(userId) {
         }));
 }
 
+// GET CART ITEMS COUNT
+async function getCartCount(userId) {
+    if (!userId) return 0;
+    const { count, error } = await supabase
+        .from('cart')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId);
+
+    if (error) {
+        return 0;
+    }
+    return count || 0;
+}
+
 // REMOVE PRODUCT FROM CART
 async function removeFromCart(userId, productId) {
     const { error } = await supabase
@@ -79,6 +93,7 @@ async function clearCart(userId) {
 module.exports = {
     addToCart,
     getCart,
+    getCartCount,
     removeFromCart,
     clearCart
 };

@@ -239,10 +239,7 @@ app.post('/cart/checkout', authenticate, async (req, res) => {
                 orderId,
                 totalAmount,
                 emailSent: !!(emailResult && emailResult.delivered),
-                recipient: 'saikatdas7320@gmail.com',
-                message: emailResult && emailResult.delivered
-                    ? `Your order #${orderId} has been placed successfully! Confirmation email has been sent to saikatdas7320@gmail.com.`
-                    : `Your order #${orderId} has been placed successfully! (Email delivery is ready once EMAIL_USER & EMAIL_PASS are set in .env)`
+                message: 'Your order has been placed successfully!'
             });
         }
 

@@ -182,10 +182,6 @@
                             <button type="button" class="btn-buy-retail" onclick="openCheckoutModal()">
                                 <i class="bi bi-lightning-fill"></i> PLACE ORDER
                             </button>
-
-                            <div class="text-center mt-3 text-secondary small">
-                                <i class="bi bi-lock-fill text-success"></i> 256-Bit Bank Grade Security
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -207,7 +203,7 @@
                     <!-- Modal Body: Confirmation Stage -->
                     <div id="modalConfirmStage" class="custom-modal-body">
                         <p class="text-secondary small mb-3">
-                            Please review your order summary below. Once confirmed, your order will be placed and processed immediately.
+                            Please review your order summary below. Once confirmed, your order will be placed immediately.
                         </p>
 
                         <div class="modal-summary-box">
@@ -229,14 +225,6 @@
                             </div>
                         </div>
 
-                        <div class="modal-info-badge mb-2">
-                            <i class="bi bi-envelope-check-fill text-primary fs-5 mt-1"></i>
-                            <div>
-                                <span class="fw-semibold d-block">Instant Email Confirmation</span>
-                                A well-drafted invoice and order details will be sent to <strong>saikatdas7320@gmail.com</strong>.
-                            </div>
-                        </div>
-
                         <div class="custom-modal-footer px-0 pb-0 mt-3 border-0 bg-transparent">
                             <button type="button" class="btn btn-secondary-retail py-2 px-3" onclick="closeCheckoutModal()">
                                 Cancel
@@ -253,22 +241,12 @@
                             <i class="bi bi-check-lg"></i>
                         </div>
 
-                        <h3 class="fs-4 fw-bold text-dark mb-1">Order Placed Successfully!</h3>
-                        <div class="mb-3">
-                            <span class="order-id-pill" id="displayOrderId">#ORD-SUCCESS</span>
-                        </div>
-
-                        <p class="text-secondary small mb-3">
-                            Thank you for your purchase! A well-drafted confirmation email and order receipt has been sent to:
-                            <br>
-                            <strong class="text-dark">saikatdas7320@gmail.com</strong>
+                        <h3 class="fs-4 fw-bold text-dark mb-2">Order Placed Successfully!</h3>
+                        <p class="text-secondary small mb-4">
+                            Thank you for your purchase! Your order has been placed and is now being processed.
                         </p>
 
-                        <div class="p-2 mb-3 bg-light rounded text-muted small" id="deliveryNote">
-                            <i class="bi bi-truck text-success"></i> Your order has been marked for dispatch and 7-day safe return.
-                        </div>
-
-                        <div class="d-flex justify-content-center gap-2 mt-4">
+                        <div class="d-flex justify-content-center gap-2">
                             <a href="/" class="btn-buy-retail py-2 px-4 text-decoration-none w-auto">
                                 <i class="bi bi-bag"></i> Continue Shopping
                             </a>
@@ -367,7 +345,6 @@
                     document.getElementById('modalErrorStage').style.display = 'none';
                     document.getElementById('modalSuccessStage').style.display = 'block';
                     document.getElementById('modalHeaderTitle').innerHTML = '<i class="bi bi-check-circle-fill text-success"></i> Order Confirmed';
-                    document.getElementById('displayOrderId').innerText = '#' + data.orderId;
                 } else {
                     // Transition to Error Stage
                     document.getElementById('modalConfirmStage').style.display = 'none';
