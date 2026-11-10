@@ -69,12 +69,17 @@ async function getUserById(id) {
     return data;
 }
 
-// GET USER BY EMAIL
-async function getUserByEmail(email) {
+// GET USER BY EMAIL OR USERNAME
+async function getUserByEmail(identifier) {
+    if (!identifier) return null;
+
+    const trimmed = identifier.trim();
+    const prefix = trimmed.includes('@') ? trimmed.split('@')[0] : trimmed;
+
     const { data, error } = await supabase
         .from('users')
         .select('*')
-        .eq('email', email)
+        .or(`email.eq.${trimmed},name.eq.${trimmed},email.eq.${prefix},name.eq.${prefix}`)
         .maybeSingle();
 
     if (error) {
