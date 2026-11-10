@@ -39,6 +39,7 @@ const port = 3000;
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(process.cwd(), 'public')));
+app.get('/favicon.ico', (req, res) => res.sendFile(path.join(process.cwd(), 'public', 'bag-check-fill.svg')));
 app.set('view engine', 'ejs')
 app.use(cookieParser());
 
