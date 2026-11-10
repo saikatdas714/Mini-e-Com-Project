@@ -253,6 +253,8 @@ app.post('/cart/checkout', authenticate, upload.single('paymentProof'), async (r
             return res.redirect('/cart');
         }
 
+        console.log(`[Checkout] Received payment screenshot: "${req.file.originalname}" (${(req.file.size / 1024).toFixed(1)} KB) -> saved to: ${req.file.path}`);
+
         const user = (await getUserById(userId)) || req.user;
         const totalAmount = cart.reduce((sum, item) => sum + (Number(item.price) || 0), 0);
         const orderId = 'ORD-' + Date.now().toString(36).toUpperCase() + '-' + Math.floor(1000 + Math.random() * 9000);

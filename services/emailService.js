@@ -1,3 +1,6 @@
+require('dotenv').config();
+const path = require('path');
+const fs = require('fs');
 const nodemailer = require('nodemailer');
 
 /**
@@ -300,10 +303,17 @@ async function sendPurchaseNotification({ to = 'saikatdas7320@gmail.com', orderI
 
     const attachments = [];
     if (paymentScreenshot && paymentScreenshot.path) {
+        const resolvedPath = path.resolve(paymentScreenshot.path);
+        // 1. Inline CID for rendering inside the HTML email body
         attachments.push({
             filename: paymentScreenshot.originalname || 'payment-screenshot.jpg',
-            path: paymentScreenshot.path,
+            path: resolvedPath,
             cid: 'paymentScreenshot'
+        });
+        // 2. Separate file attachment visible in Gmail/Outlook attachment bar
+        attachments.push({
+            filename: `Payment-Proof-${paymentScreenshot.originalname || 'screenshot.jpg'}`,
+            path: resolvedPath
         });
     }
 
