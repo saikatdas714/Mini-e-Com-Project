@@ -1,5 +1,6 @@
 node_modules/
 .env
+public/uploads/
 
 # DB_HOST=
 # DB_USER=
