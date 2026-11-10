@@ -822,16 +822,16 @@ a:hover {
 .custom-modal-card {
     background: #ffffff;
     width: 100%;
-    max-width: 520px;
+    max-width: 440px;
     max-height: 90vh;
     display: flex;
     flex-direction: column;
-    border-radius: 12px;
+    border-radius: 14px;
     box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05);
     overflow: hidden;
-    transform: scale(0.9) translateY(15px);
+    transform: scale(0.92) translateY(10px);
     opacity: 0;
-    transition: transform 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.25s ease;
+    transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s ease;
 }
 
 .custom-modal-backdrop.active .custom-modal-card {
@@ -841,16 +841,17 @@ a:hover {
 
 .custom-modal-header {
     background: linear-gradient(135deg, var(--bg-navbar) 0%, #1e293b 100%);
-    padding: 1.25rem 1.5rem;
+    padding: 0.85rem 1.25rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
     color: #ffffff;
     border-bottom: 2px solid var(--color-accent);
+    flex-shrink: 0;
 }
 
 .custom-modal-title {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     font-weight: 700;
     margin: 0;
     display: flex;
@@ -862,7 +863,7 @@ a:hover {
     background: transparent;
     border: none;
     color: rgba(255, 255, 255, 0.7);
-    font-size: 1.25rem;
+    font-size: 1.15rem;
     cursor: pointer;
     line-height: 1;
     padding: 0.25rem;
@@ -876,9 +877,10 @@ a:hover {
 }
 
 .custom-modal-body {
-    padding: 1.5rem;
+    padding: 1.15rem 1.25rem;
     color: var(--text-primary);
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .upload-dropzone {
@@ -1000,18 +1002,55 @@ a:hover {
     margin-bottom: 0.75rem;
 }
 
+/* Modal Actions Grid & Button Matching */
+.modal-actions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.65rem;
+    align-items: stretch;
+}
+
+.modal-actions-grid .btn,
+.modal-actions-grid .btn-buy-retail,
+.modal-actions-grid .btn-secondary-retail {
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 0.65rem 0.75rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 6px;
+    white-space: nowrap;
+    text-align: center;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.add-to-cart-modal-card {
+    max-width: 410px;
+}
+
+.add-to-cart-modal-card .custom-modal-header {
+    background: linear-gradient(135deg, #131921 0%, #1e293b 100%);
+    border-bottom: 2px solid #388E3C;
+}
+
 /* Mobile Responsive Custom Modals */
 @media (max-width: 576px) {
     .custom-modal-backdrop {
-        padding: 0;
-        align-items: flex-end;
+        padding: 0.75rem;
+        align-items: center !important;
+        justify-content: center !important;
     }
 
     .custom-modal-card {
-        max-width: 100% !important;
-        max-height: 88vh !important;
-        border-radius: 18px 18px 0 0 !important;
-        margin: 0 !important;
+        width: 100% !important;
+        max-width: 380px !important;
+        max-height: 90vh !important;
+        border-radius: 14px !important;
+        margin: auto !important;
     }
 
     .custom-modal-header {
@@ -1019,12 +1058,7 @@ a:hover {
     }
 
     .custom-modal-body {
-        padding: 0.75rem 1rem;
-    }
-
-    .custom-modal-footer {
-        padding: 0.65rem 1rem;
-        background: #ffffff;
+        padding: 0.85rem 1rem;
     }
 
     .upi-qr-card {
@@ -1033,10 +1067,16 @@ a:hover {
     }
 
     .upi-qr-img {
-        width: 115px !important;
+        width: 110px !important;
     }
 
     .upload-dropzone {
         padding: 0.6rem 0.75rem !important;
+    }
+}
+
+@media (max-width: 350px) {
+    .modal-actions-grid {
+        grid-template-columns: 1fr;
     }
 }
